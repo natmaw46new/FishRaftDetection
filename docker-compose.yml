@@ -1,0 +1,20 @@
+services:
+  fish-raft:
+    build:
+      dockerfile: Dockerfile
+    image: fish-raft-pipeline:latest
+    container_name: fish-raft-dev
+    shm_size: "8gb"
+    volumes:
+      - .:/app
+      - /absolute/host/path/to/fish_raft_data:/app/data:ro
+      - /absolute/host/path/to/shp_files:/app/data:ro
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    tty: true
+    stdin_open: true

@@ -1,0 +1,12 @@
+geopandas
+rasterio
+fiona
+shapely
+pycocotools
+
+opencv-python-headless
+pillow
+numpy
+tqdm
+matplotlib
+jupyter
