@@ -1,5 +1,6 @@
 import os
 import json
+import random
 from pathlib import Path
 
 import numpy as np
@@ -21,10 +22,13 @@ TILE_SIZE = 1024
 OVERLAP = 384
 STRIDE = TILE_SIZE - OVERLAP
 
-MIN_VISIBLE_FRAC = 0.6
+MIN_VISIBLE_FRAC = 0.8
 CATEGORY_NAME = "fish_raft"
 CATEGORY_ID = 1
 TILE_IMAGE_FORMAT = "png"
+
+BACKGROUND_TILE_RATIO = 4.0  # background tiles sampled per raft-adjacent tile
+RANDOM_SEED = 42
 
 
 # ============================================================
@@ -86,6 +90,36 @@ def generate_tile_bboxes(tif_index, region_of_interest, tile_size_px, stride_px,
         x += stride_units
 
     print(f"generated {len(bboxes)} candidate tiles intersecting the label region")
+    return bboxes
+
+
+# ============================================================
+# Random background sampling - uniform draws from anywhere in the survey
+# that ISN'T already covered by the raft-adjacent tiles above
+# ============================================================
+def sample_background_tiles(tif_index, region_of_interest, n_samples, tile_size_px, gsd, seed=RANDOM_SEED):
+    rng = random.Random(seed)
+    tile_size_units = tile_size_px * gsd
+    minx, miny, maxx, maxy = tif_index.total_bounds
+
+    bboxes = []
+    attempts = 0
+    max_attempts = n_samples * 50  # safety valve in case the region excludes too much
+
+    while len(bboxes) < n_samples and attempts < max_attempts:
+        attempts += 1
+        x = rng.uniform(minx, maxx - tile_size_units)
+        y = rng.uniform(miny, maxy - tile_size_units)
+        tile_box = box(x, y, x + tile_size_units, y + tile_size_units)
+
+        if tile_box.intersects(region_of_interest):
+            continue  # too close to a labeled raft - already covered by the positive pass
+        if not tif_index.intersects(tile_box).any():
+            continue  # falls in a gap with no actual imagery
+
+        bboxes.append((x, y, x + tile_size_units, y + tile_size_units))
+
+    print(f"sampled {len(bboxes)} random background tiles ({attempts} attempts)")
     return bboxes
 
 
@@ -185,7 +219,13 @@ def main():
     tif_index, raster_crs, gsd = build_tif_index(TIF_DIR)
     buffer_units = OVERLAP * gsd
     labels, region_of_interest = load_labels(SHP_PATH, raster_crs, buffer_units)
-    bboxes = generate_tile_bboxes(tif_index, region_of_interest, TILE_SIZE, STRIDE, gsd)
+    raft_bboxes = generate_tile_bboxes(tif_index, region_of_interest, TILE_SIZE, STRIDE, gsd)
+
+    n_background = round(len(raft_bboxes) * BACKGROUND_TILE_RATIO)
+    background_bboxes = sample_background_tiles(tif_index, region_of_interest, n_background, TILE_SIZE, gsd)
+
+    bboxes = raft_bboxes + background_bboxes
+    print(f"total tiles to process: {len(bboxes)} ({len(raft_bboxes)} raft-adjacent + {len(background_bboxes)} background)")
 
     coco = {
         "images": [],
