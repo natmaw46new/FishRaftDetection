@@ -8,6 +8,7 @@ import rasterio
 from rasterio.merge import merge
 import geopandas as gpd
 from shapely.geometry import box, Polygon, MultiPolygon
+from shapely.affinity import scale as affine_scale
 from shapely.ops import unary_union
 from PIL import Image
 
@@ -18,9 +19,13 @@ TIF_DIR = "/app/data/tifs"
 SHP_PATH = "/app/data/rafts.shp"
 OUTPUT_DIR = "/app/outputs/tiles"
 
-TILE_SIZE = 1024
-OVERLAP = 384
+TILE_SIZE = 2048        # native-resolution capture size - sized for full containment
+                         # of the largest known raft (~600px at this GSD)
+OVERLAP = 1024           # ~1.7x margin over the 600px max raft; see margin/redundancy notes
 STRIDE = TILE_SIZE - OVERLAP
+
+OUTPUT_TILE_SIZE = 1024  # actual size saved to disk / fed to the network - keeps
+                         # Detectron2 input resolution (and its compute cost) unchanged
 
 MIN_VISIBLE_FRAC = 0.8
 CATEGORY_NAME = "fish_raft"
@@ -227,6 +232,8 @@ def main():
     bboxes = raft_bboxes + background_bboxes
     print(f"total tiles to process: {len(bboxes)} ({len(raft_bboxes)} raft-adjacent + {len(background_bboxes)} background)")
 
+    resize_scale = OUTPUT_TILE_SIZE / TILE_SIZE  # e.g. 0.5 for a 2048 -> 1024 crop
+
     coco = {
         "images": [],
         "annotations": [],
@@ -253,15 +260,27 @@ def main():
 
         instances = clip_polygons_to_tile(labels, bbox, transform, MIN_VISIBLE_FRAC)
 
+        # captured at native TILE_SIZE for containment margin, then downsized to
+        # OUTPUT_TILE_SIZE for the network - polygons get the same scale factor
+        # applied so they stay aligned with what's actually saved to disk
+        tile_image = Image.fromarray(rgb.astype(np.uint8)).resize(
+            (OUTPUT_TILE_SIZE, OUTPUT_TILE_SIZE), Image.LANCZOS
+        )
         file_name = f"tile_{image_id:06d}.{TILE_IMAGE_FORMAT}"
-        Image.fromarray(rgb.astype(np.uint8)).save(images_dir / file_name)
+        tile_image.save(images_dir / file_name)
 
         coco["images"].append(
-            {"id": image_id, "file_name": file_name, "width": TILE_SIZE, "height": TILE_SIZE}
+            {
+                "id": image_id,
+                "file_name": file_name,
+                "width": OUTPUT_TILE_SIZE,
+                "height": OUTPUT_TILE_SIZE,
+                "geo_bbox": [bbox[0], bbox[1], bbox[2], bbox[3]],
+            }
         )
 
         for inst in instances:
-            poly = inst["polygon"]
+            poly = affine_scale(inst["polygon"], xfact=resize_scale, yfact=resize_scale, origin=(0, 0))
             coco["annotations"].append(
                 {
                     "id": annotation_id,
@@ -280,7 +299,10 @@ def main():
     with open(Path(OUTPUT_DIR) / "annotations.json", "w") as f:
         json.dump(coco, f)
 
-    print(f"wrote {image_id} tiles and {annotation_id} raft instances to {OUTPUT_DIR}")
+    print(
+        f"wrote {image_id} tiles ({TILE_SIZE}px captured -> {OUTPUT_TILE_SIZE}px saved) "
+        f"and {annotation_id} raft instances to {OUTPUT_DIR}"
+    )
 
 
 if __name__ == "__main__":
