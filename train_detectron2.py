@@ -11,12 +11,12 @@ from detectron2.utils.logger import setup_logger
 # ============================================================
 # CONFIG
 # ============================================================
-TRAIN_DIR = "./data/output/tiles/train"
-VAL_DIR = "./data/output/tiles/val"
+TRAIN_DIR = "./data/1-to-1-ratiobackground/tiles/train"
+VAL_DIR = "./data/1-to-1-ratiobackground/tiles/val"
 
-TRAIN_JSON = "./data/output/tiles/instances_train.json"
-VAL_JSON = "./data/output/tiles/instances_val.json"
-OUTPUT_DIR = "./data/output/model"
+TRAIN_JSON = "./data/1-to-1-ratiobackground/tiles/instances_train.json"
+VAL_JSON = "./data/1-to-1-ratiobackground/tiles/instances_val.json"
+OUTPUT_DIR = "./data/1-to-1-ratiobackground/model"
 
 BASE_CONFIG = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
 NUM_CLASSES = 1  # fish_raft only
