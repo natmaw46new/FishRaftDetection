@@ -9,12 +9,12 @@ services:
       - .:/app
       # - /absolute/host/path/to/fish_raft_data:/app/data:ro
       # - /absolute/host/path/to/shp_files:/app/data:ro
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     tty: true
     stdin_open: true

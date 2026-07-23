@@ -11,10 +11,12 @@ from detectron2.utils.logger import setup_logger
 # ============================================================
 # CONFIG
 # ============================================================
-IMAGES_DIR = "/app/outputs/tiles/images"
-TRAIN_JSON = "/app/outputs/train_val_split/instances_train.json"
-VAL_JSON = "/app/outputs/train_val_split/instances_val.json"
-OUTPUT_DIR = "/app/outputs/model"
+TRAIN_DIR = "./data/output/tiles/train"
+VAL_DIR = "./data/output/tiles/val"
+
+TRAIN_JSON = "./data/output/tiles/instances_train.json"
+VAL_JSON = "./data/output/tiles/instances_val.json"
+OUTPUT_DIR = "./data/output/model"
 
 BASE_CONFIG = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
 NUM_CLASSES = 1  # fish_raft only
@@ -43,8 +45,8 @@ class Trainer(DefaultTrainer):
 def main():
     setup_logger()
 
-    register_coco_instances("fish_raft_train", {}, TRAIN_JSON, IMAGES_DIR)
-    register_coco_instances("fish_raft_val", {}, VAL_JSON, IMAGES_DIR)
+    register_coco_instances("fish_raft_train", {}, TRAIN_JSON, os.path.join(TRAIN_DIR, "images"))
+    register_coco_instances("fish_raft_val", {}, VAL_JSON, os.path.join(VAL_DIR, "images"))
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(BASE_CONFIG))
