@@ -7,9 +7,9 @@ from pathlib import Path
 # ============================================================
 # CONFIG
 # ============================================================
-ANNOTATIONS_PATH = "./data/output/tiles/annotations.json"
-IMAGES_DIR = "./data/output/tiles/images"
-OUTPUT_DIR = "./data/output/tiles"
+ANNOTATIONS_PATH = "./data/1-to-1-ratiobackground/tiles/annotations.json"
+IMAGES_DIR = "./data/1-to-1-ratiobackground/tiles/images"
+OUTPUT_DIR = "./data/1-to-1-ratiobackground/tiles"
 
 BLOCK_SIZE_METERS = 5000  # spatial grouping size - well above tile stride so
                           # overlapping tiles always land in the same block

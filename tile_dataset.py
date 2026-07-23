@@ -15,9 +15,9 @@ from PIL import Image
 # ============================================================
 # CONFIG
 # ============================================================
-TIF_DIR = "/app/data/tifs"
-SHP_PATH = "/app/data/rafts.shp"
-OUTPUT_DIR = "/app/outputs/tiles"
+TIF_DIR = "./data/tifs"
+SHP_PATH = "./data/rafts.shp"
+OUTPUT_DIR = "./data/1-to-1-ratiobackground/tiles"
 
 TILE_SIZE = 2048        # native-resolution capture size - sized for full containment
                          # of the largest known raft (~600px at this GSD)
@@ -32,7 +32,7 @@ CATEGORY_NAME = "fish_raft"
 CATEGORY_ID = 1
 TILE_IMAGE_FORMAT = "png"
 
-BACKGROUND_TILE_RATIO = 4.0  # background tiles sampled per raft-adjacent tile
+BACKGROUND_TILE_RATIO = 1.0  # background tiles sampled per raft-adjacent tile
 RANDOM_SEED = 42
 
 
