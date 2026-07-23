@@ -28,6 +28,12 @@ CHECKPOINT_PERIOD = 1000
 EVAL_PERIOD = 1000
 NUM_WORKERS = 2
 
+# Target "presence frequency" for the repeat-factor sampler below: roughly the
+# share of sampled images per epoch that should contain at least one fish_raft.
+# Raise this closer to 1.0 for more aggressive upsampling of raft tiles, lower
+# it toward 0 to fall back closer to plain random sampling.
+REPEAT_THRESHOLD = 0.3
+
 # scale-jitter range for training - centered on the 1024px tile size, a hedge
 # against the 1:5000 / 1:1000 resolution domain gap discussed earlier
 MIN_SIZE_TRAIN_CHOICES = (768, 896, 1024, 1152, 1280)
@@ -53,6 +59,19 @@ def main():
     cfg.DATASETS.TRAIN = ("fish_raft_train",)
     cfg.DATASETS.TEST = ("fish_raft_val",)
     cfg.DATALOADER.NUM_WORKERS = NUM_WORKERS
+    # Detectron2 defaults to True here, which drops every image with 0 annotations
+    # from training — that's exactly the background tiles tile_dataset.py sampled
+    # on purpose as negatives. Keep them.
+    cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS = False
+
+    # With only one category, the "category frequency" this sampler balances on
+    # collapses to "fraction of images that contain a fish_raft at all." This
+    # upsamples raft-containing tiles relative to background-only ones, purely
+    # via sampling weights — no tiles are duplicated on disk or dropped. It
+    # recalculates automatically from whatever's actually in TRAIN_JSON, so it
+    # keeps working correctly even after you change BACKGROUND_TILE_RATIO.
+    cfg.DATALOADER.SAMPLER_TRAIN = "RepeatFactorTrainingSampler"
+    cfg.DATALOADER.REPEAT_THRESHOLD = REPEAT_THRESHOLD
 
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(BASE_CONFIG)  # COCO-pretrained backbone
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = NUM_CLASSES
