@@ -21,12 +21,12 @@ OUTPUT_DIR = "./data/output/model"
 BASE_CONFIG = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
 NUM_CLASSES = 1  # fish_raft only
 
-IMS_PER_BATCH = 2
-BASE_LR = 0.00025
-MAX_ITER = 20000
-CHECKPOINT_PERIOD = 1000
-EVAL_PERIOD = 1000
-NUM_WORKERS = 2
+IMS_PER_BATCH = 8
+BASE_LR = 0.001
+MAX_ITER = 5000
+CHECKPOINT_PERIOD = 500
+EVAL_PERIOD = 500
+NUM_WORKERS = 4
 
 # Target "presence frequency" for the repeat-factor sampler below: roughly the
 # share of sampled images per epoch that should contain at least one fish_raft.
