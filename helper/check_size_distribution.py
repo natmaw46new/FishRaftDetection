@@ -1,7 +1,7 @@
 import json
 
-TRAIN_JSON = "./data/output/tiles/instances_train.json"
-VAL_JSON = "./data/output/tiles/instances_val.json"
+TRAIN_JSON = "./data/rotation_augment+newsplit/tiles/instances_train.json"
+VAL_JSON = "./data/rotation_augment+newsplit/tiles/instances_val.json"
 
 # Same thresholds COCOEvaluator uses, in px^2, on the same 1024px tile pixel
 # space your annotations are already stored in.

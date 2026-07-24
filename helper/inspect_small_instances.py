@@ -8,9 +8,9 @@ import numpy as np
 # ============================================================
 # CONFIG
 # ============================================================
-JSON_PATH = "./data/output/tiles/instances_train.json"
-IMAGES_DIR = "./data/output/tiles/images"  # full tile pool; train/val symlinks both point here
-OUTPUT_DIR = "./data/output/smallest_instances"
+JSON_PATH = "./data/rotation_augment+newsplit/tiles/instances_train.json"
+IMAGES_DIR = "./data/rotation_augment+newsplit/tiles/images"  # full tile pool; train/val symlinks both point here
+OUTPUT_DIR = "./data/rotation_augment+newsplit/smallest_instances"
 
 N_SMALLEST = 20    # how many of the tiniest instances to crop out for visual inspection
 CROP_PADDING = 25  # px of surrounding context in each saved crop
