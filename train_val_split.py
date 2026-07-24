@@ -7,8 +7,8 @@ from pathlib import Path
 # ============================================================
 # CONFIG
 # ============================================================
-ANNOTATIONS_PATH = "./data/rotation_augment+newsplit/tiles/annotations.json"
-IMAGES_DIR = "./data/rotation_augment+newsplit/tiles/images"
+ANNOTATIONS_PATH = "./data/1-to-1-ratiobackground/tiles/annotations.json"
+IMAGES_DIR = "./data/1-to-1-ratiobackground/tiles/images"
 OUTPUT_DIR = "./data/rotation_augment+newsplit/tiles"
 
 BLOCK_SIZE_METERS = 5000  # spatial grouping size - well above tile stride so
