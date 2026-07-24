@@ -73,7 +73,7 @@ class Trainer(DefaultTrainer):
             ),
             T.RandomFlip(horizontal=True, vertical=False),
             T.RandomFlip(horizontal=False, vertical=True),
-            T.RandomRotation(angle=ROTATION_ANGLE_RANGE, expand=False, sample_style="range"),
+            # T.RandomRotation(angle=ROTATION_ANGLE_RANGE, expand=False, sample_style="range"),
         ]
         mapper = DatasetMapper(cfg, is_train=True, augmentations=augmentations)
         return build_detection_train_loader(cfg, mapper=mapper)
