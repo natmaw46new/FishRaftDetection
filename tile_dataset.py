@@ -15,8 +15,12 @@ from PIL import Image
 # ============================================================
 # CONFIG
 # ============================================================
-TIF_DIR = "./data/tifs"
-SHP_PATH = "./data/rafts.shp"
+# TIF_DIR = "./data/tifs"
+# SHP_PATH = "./data/rafts.shp"
+
+TIF_DIR = "V:/HK/TDOP5000/Tiles"
+SHP_PATH = "C:/Users/Insight/Documents/FishRaftDetection/data/shp/rafts.shp"
+
 OUTPUT_DIR = "./data/rotation_augment+newsplit/tiles"
 
 TILE_SIZE = 2048        # native-resolution capture size - sized for full containment
