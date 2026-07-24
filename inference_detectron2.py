@@ -12,9 +12,9 @@ from detectron2.engine import DefaultPredictor
 # ============================================================
 # CONFIG
 # ============================================================
-IMAGES_DIR = "./data/output/inference_tiles/images"
-MODEL_WEIGHTS = "./data/output/model/model_final.pth"
-OUTPUT_JSON = "./data/output/inference_tiles/predictions.json"
+IMAGES_DIR = "./data/rotation_augment+newsplit/inference_tiles/images"
+MODEL_WEIGHTS = "./data/rotation_augment+newsplit/model/model_final.pth"
+OUTPUT_JSON = "./data/rotation_augment+newsplit/inference_tiles/predictions.json"
 
 BASE_CONFIG = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
 NUM_CLASSES = 1

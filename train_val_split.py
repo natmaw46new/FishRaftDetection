@@ -7,14 +7,19 @@ from pathlib import Path
 # ============================================================
 # CONFIG
 # ============================================================
-ANNOTATIONS_PATH = "./data/1-to-1-ratiobackground/tiles/annotations.json"
-IMAGES_DIR = "./data/1-to-1-ratiobackground/tiles/images"
-OUTPUT_DIR = "./data/1-to-1-ratiobackground/tiles"
+ANNOTATIONS_PATH = "./data/rotation_augment+newsplit/tiles/annotations.json"
+IMAGES_DIR = "./data/rotation_augment+newsplit/tiles/images"
+OUTPUT_DIR = "./data/rotation_augment+newsplit/tiles"
 
 BLOCK_SIZE_METERS = 5000  # spatial grouping size - well above tile stride so
                           # overlapping tiles always land in the same block
 VAL_FRACTION = 0.2
-RANDOM_SEED = 42
+# fixed by default for reproducibility - re-running with the same seed on the
+# same tiles always gives the same split, which is what you want when
+# comparing two training configs against each other. Override with
+# `SPLIT_SEED=7 python train_val_split.py` to check whether results are
+# sensitive to which geo-blocks happened to land in val.
+RANDOM_SEED = int(os.environ.get("SPLIT_SEED", 42))
 
 # creates train/images and val/images with symlinks (not copies) into IMAGES_DIR,
 # matching the conventional COCO folder layout without duplicating disk space

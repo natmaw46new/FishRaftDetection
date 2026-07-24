@@ -17,7 +17,7 @@ from PIL import Image
 # ============================================================
 TIF_DIR = "./data/tifs"
 SHP_PATH = "./data/rafts.shp"
-OUTPUT_DIR = "./data/1-to-1-ratiobackground/tiles"
+OUTPUT_DIR = "./data/rotation_augment+newsplit/tiles"
 
 TILE_SIZE = 2048        # native-resolution capture size - sized for full containment
                          # of the largest known raft (~600px at this GSD)

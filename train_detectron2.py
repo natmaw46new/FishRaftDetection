@@ -3,6 +3,8 @@ import os
 import torch
 from detectron2 import model_zoo
 from detectron2.config import get_cfg
+from detectron2.data import DatasetMapper, build_detection_train_loader
+from detectron2.data import transforms as T
 from detectron2.data.datasets import register_coco_instances
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator
@@ -11,12 +13,12 @@ from detectron2.utils.logger import setup_logger
 # ============================================================
 # CONFIG
 # ============================================================
-TRAIN_DIR = "./data/output/tiles/train"
-VAL_DIR = "./data/output/tiles/val"
+TRAIN_DIR = "./data/rotation_augment+newsplit/tiles/train"
+VAL_DIR = "./data/rotation_augment+newsplit/tiles/val"
 
-TRAIN_JSON = "./data/output/tiles/instances_train.json"
-VAL_JSON = "./data/output/tiles/instances_val.json"
-OUTPUT_DIR = "./data/output/model"
+TRAIN_JSON = "./data/rotation_augment+newsplit/tiles/instances_train.json"
+VAL_JSON = "./data/rotation_augment+newsplit/tiles/instances_val.json"
+OUTPUT_DIR = "./data/rotation_augment+newsplit/model"
 
 BASE_CONFIG = "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
 NUM_CLASSES = 1  # fish_raft only
@@ -41,11 +43,40 @@ MAX_SIZE_TRAIN = 1333
 MIN_SIZE_TEST = 1024
 MAX_SIZE_TEST = 1024
 
+# aerial imagery has no canonical "up" the way natural photos do - a raft
+# looks the same at any orientation - so augment with full-range rotation on
+# top of the default flip, rather than treating orientation as fixed
+ROTATION_ANGLE_RANGE = [-180, 180]
+
+# default FPN anchor sizes are [32, 64, 128, 256, 512], one per pyramid level -
+# but check_size_distribution.py / inspect_small_instances.py showed ~87% of
+# instances are 8-32px (side length) and essentially none exceed 48px. The
+# default 32px minimum anchor is already larger than most of the actual data,
+# which weakens RPN's positive-anchor matches for most instances and forces
+# box regression to shrink oversized proposals down to fit. Shift every level
+# down by one octave to better match the measured distribution.
+ANCHOR_SIZES = [[16], [32], [64], [128], [256]]
+
 
 class Trainer(DefaultTrainer):
     @classmethod
     def build_evaluator(cls, cfg, dataset_name):
         return COCOEvaluator(dataset_name, output_dir=cfg.OUTPUT_DIR)
+
+    @classmethod
+    def build_train_loader(cls, cfg):
+        augmentations = [
+            T.ResizeShortestEdge(
+                short_edge_length=cfg.INPUT.MIN_SIZE_TRAIN,
+                max_size=cfg.INPUT.MAX_SIZE_TRAIN,
+                sample_style=cfg.INPUT.MIN_SIZE_TRAIN_SAMPLING,
+            ),
+            T.RandomFlip(horizontal=True, vertical=False),
+            T.RandomFlip(horizontal=False, vertical=True),
+            T.RandomRotation(angle=ROTATION_ANGLE_RANGE, expand=False, sample_style="range"),
+        ]
+        mapper = DatasetMapper(cfg, is_train=True, augmentations=augmentations)
+        return build_detection_train_loader(cfg, mapper=mapper)
 
 
 def main():
@@ -76,6 +107,7 @@ def main():
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(BASE_CONFIG)  # COCO-pretrained backbone
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = NUM_CLASSES
     cfg.MODEL.DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    cfg.MODEL.ANCHOR_GENERATOR.SIZES = ANCHOR_SIZES
 
     cfg.SOLVER.IMS_PER_BATCH = IMS_PER_BATCH
     cfg.SOLVER.BASE_LR = BASE_LR

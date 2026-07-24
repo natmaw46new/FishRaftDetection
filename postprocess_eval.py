@@ -13,12 +13,12 @@ from pycocotools.coco import COCO
 # ============================================================
 # CONFIG
 # ============================================================
-VAL_JSON = "./data/output/tiles/instances_val.json"
-VAL_IMAGES_DIR = "./data/output/tiles/val/images"
-PREDICTIONS_JSON = "./data/output/model/coco_instances_results.json"
-METRICS_JSON = "./data/output/model/metrics.json"
+VAL_JSON = "./data/rotation_augment+newsplit/tiles/instances_val.json"
+VAL_IMAGES_DIR = "./data/rotation_augment+newsplit/tiles/val/images"
+PREDICTIONS_JSON = "./data/rotation_augment+newsplit/model/coco_instances_results.json"
+METRICS_JSON = "./data/rotation_augment+newsplit/model/metrics.json"
 
-OUTPUT_DIR = "./data/output/eval_report"
+OUTPUT_DIR = "./data/rotation_augment+newsplit/eval_report"
 VIS_DIR = os.path.join(OUTPUT_DIR, "visualizations")
 REPORT_PATH = os.path.join(OUTPUT_DIR, "eval_report.txt")
 
